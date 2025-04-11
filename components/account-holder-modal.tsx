@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 import { useToast } from "@/components/ui/use-toast"
 import { createAccount, resetAccountState } from "@/store/accountSlice"
 import { X, Upload } from "lucide-react"
@@ -10,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAppDispatch, useAppSelector } from "@/store/hook"
 import { OccupationEnum } from "@/enums/OccupationEnum"
 
-export default function AccountHolderModal() {
-  const router = useRouter()
+interface Props {
+  visible: boolean
+  onClose: () => void
+}
+
+export default function AddAccountHolderModal({ visible, onClose }: Props) {
   const { toast } = useToast()
   const dispatch = useAppDispatch()
   const { loading, error, success } = useAppSelector((state) => state.account)
@@ -65,15 +68,15 @@ export default function AccountHolderModal() {
         title: "Account Created",
         description: "The account holder has been successfully added.",
       })
-  
+
       const timeout = setTimeout(() => {
         dispatch(resetAccountState())
-        router.push("/")
+        onClose()
       }, 1500)
-  
+
       return () => clearTimeout(timeout)
     }
-  }, [success, dispatch, router, toast])
+  }, [success, dispatch, onClose, toast])
 
   useEffect(() => {
     if (error) {
@@ -84,26 +87,25 @@ export default function AccountHolderModal() {
       })
     }
   }, [error, toast])
-  
+
+  if (!visible) return null
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-md p-6 relative">
-
-        <button
-          className="absolute right-4 top-4"
-          onClick={() => router.push("/")}
-        >
+        <button className="absolute right-4 top-4" onClick={onClose}>
           <X className="h-5 w-5 text-gray-500" />
         </button>
 
         <h2 className="text-xl font-bold mb-1">Add an account holder</h2>
         <p className="text-gray-600 mb-6">Fill the details below in order to add an account holder.</p>
 
-        {/* Image upload area */}
+        {/* Image Upload */}
         <div className="mb-6">
           <div
-            className={`relative rounded-full w-32 h-32 mx-auto border-2 border-dashed ${dragActive ? "border-green-500 bg-green-50" : "border-green-300"} flex items-center justify-center bg-green-50/50`}
+            className={`relative rounded-full w-32 h-32 mx-auto border-2 border-dashed ${
+              dragActive ? "border-green-500 bg-green-50" : "border-green-300"
+            } flex items-center justify-center bg-green-50/50`}
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
@@ -112,12 +114,7 @@ export default function AccountHolderModal() {
             <div className="absolute flex flex-col items-center justify-center">
               <div className="relative">
                 <div className="w-16 h-16 bg-white rounded-md border border-gray-200 flex items-center justify-center">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM5 19V5H19V19H5ZM9.5 13.5L11 15.5L14 11.5L18 17H6L9.5 13.5Z"
-                      fill="#C5C5C5"
-                    />
-                  </svg>
+                  <Upload className="h-6 w-6 text-gray-400" />
                 </div>
                 <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-1.5">
                   <Upload className="h-4 w-4 text-white" />
@@ -135,60 +132,31 @@ export default function AccountHolderModal() {
           </div>
         </div>
 
-        {/* Form fields */}
+        {/* Form Fields */}
         <div className="space-y-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
-              First Name
-            </label>
-            <Input
-              id="firstName"
-              placeholder="Enter first name"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-            />
-          </div>
+          <Input id="firstName" placeholder="First Name" value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          <Input id="lastName" placeholder="Last Name" value={lastName} onChange={(e) => setLastName(e.target.value)} />
 
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name
-            </label>
-            <Input
-              id="lastName"
-              placeholder="Enter last name"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-            />
-          </div>
+          <Select onValueChange={setOccupation}>
+            <SelectTrigger className="w-full text-gray-700">
+              <SelectValue placeholder="Select occupation" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={OccupationEnum.SOFTWARE_ENGINEER}>Software Engineer</SelectItem>
+              <SelectItem value={OccupationEnum.DOCTOR}>Doctor</SelectItem>
+              <SelectItem value={OccupationEnum.ARTIST}>Artist</SelectItem>
+              <SelectItem value={OccupationEnum.LAWYER}>Lawyer</SelectItem>
+              <SelectItem value={OccupationEnum.SCIENTIST}>Scientist</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div>
-            <label htmlFor="occupation" className="block text-sm font-medium text-gray-700 mb-1">
-              Occupation
-            </label>
-            <Select onValueChange={setOccupation}>
-              <SelectTrigger className="w-full text-gray-700">
-                <SelectValue placeholder="Select occupation" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={OccupationEnum.SOFTWARE_ENGINEER}>Software Engineer</SelectItem>
-                <SelectItem value={OccupationEnum.DOCTOR}>Doctor</SelectItem>
-                <SelectItem value={OccupationEnum.ARTIST}>Artist</SelectItem>
-                <SelectItem value={OccupationEnum.LAWYER}>Lawyer</SelectItem>
-                <SelectItem value={OccupationEnum.SCIENTIST}>Scientist</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="mt-10">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-md transition-colors"
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
-            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-          </div>
+          <button
+            onClick={handleSubmit}
+            disabled={loading}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-md transition-colors"
+          >
+            {loading ? "Saving..." : "Save"}
+          </button>
         </div>
       </div>
     </div>

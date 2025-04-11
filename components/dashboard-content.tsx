@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react'
 import { User } from 'lucide-react'
-import Link from 'next/link'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { deleteAccount, fetchAccountHolders, updateAccount } from '@/store/accountSlice'
 import Swal from 'sweetalert2'
 import { Button } from './ui/button'
 import { UpdateAccountModal } from './UpdateAccountModal'
+import {useRouter} from 'next/navigation'
+import AddAccountHolderModal from '@/components/account-holder-modal'
 
 interface Account {
   id: string
@@ -15,12 +16,17 @@ interface Account {
   lastName: string
   occupation: string
   createdAt: string
+  image: string 
 }
+
 
 export default function DashboardContent() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const { accounts, loading, error } = useAppSelector((state: any) => state.account)
-
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+  const openCreateModal = () => setIsCreateModalOpen(true)
+  const closeCreateModal = () => setIsCreateModalOpen(false)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -39,6 +45,9 @@ const closeModal = () => setIsModalOpen(false)
   }
   const handleUpdate = (id: string, data: { firstName: string; lastName: string; occupation: string }) => {
     dispatch(updateAccount({ id, data }))
+  }
+  const handleCreateModal = ()=>{
+    router.push("/account-holder-modal")
   }
   
 
@@ -70,17 +79,24 @@ const closeModal = () => setIsModalOpen(false)
                 key={acc.id}
                 className="border p-4 rounded-lg shadow-sm flex items-center justify-between"
               >
-                <div>
-                  <h4 className="text-lg font-semibold">Name: {acc.firstName} {acc.lastName}</h4>
-                  <p className="text-gray-500">Occupation: {acc.occupation}</p>
-                  <p className="text-gray-500">
-                    Date: {new Date(acc.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    })}
-                  </p>
-                </div>
+                <div className="flex items-center space-x-4">
+              <img
+                src={`http://localhost:3001/uploads/${acc.image}`}
+                alt={`${acc.firstName} ${acc.lastName}`}
+                className="w-16 h-16 rounded-full object-cover border"
+              />
+            <div>
+              <h4 className="text-lg font-semibold">Name: {acc.firstName} {acc.lastName}</h4>
+              <p className="text-gray-500">Occupation: {acc.occupation}</p>
+              <p className="text-gray-500">
+                Date: {new Date(acc.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                })}
+              </p>
+            </div>
+          </div>
                 <div className="flex space-x-4">
                 <Button
                   onClick={() => openModal(acc)}
@@ -119,11 +135,8 @@ const closeModal = () => setIsModalOpen(false)
             You're yet to add an account holder. Adding an account would give you access to adding various valuable
             assets for each holder.
           </p>
-          <Link href="/account-holder-modal">
-            <Button className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-              Add an account holder
-            </Button>
-          </Link>
+          <Button onClick={openCreateModal} className="px-6 py-3 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">Add Account Holder</Button>
+            <AddAccountHolderModal visible={isCreateModalOpen} onClose={closeCreateModal} />
         </>
       )}
     </div>
