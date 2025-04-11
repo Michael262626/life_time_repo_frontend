@@ -17,7 +17,7 @@ To run the project locally, follow these steps:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/your-nextjs-app.git
+git clone https://github.com/Michael262626/life_time_repo_frontend
 cd your-nextjs-app
 
 npm install or npm install --legacy-peer-deps

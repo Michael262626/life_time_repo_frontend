@@ -2,7 +2,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { ReduxProvider } from '../store/ReduxProvider'
-import { Toaster } from '@/components/ui/toaster'
 
 export const metadata: Metadata = {
   title: 'Life time App',
